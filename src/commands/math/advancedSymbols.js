@@ -303,6 +303,9 @@ LatexCmds.xists = LatexCmds.exist = LatexCmds.exists =
 LatexCmds.nexists = LatexCmds.nexist =
       bind(VanillaSymbol, '\\nexists ', '&#8708;');
 
+LatexCmds.forall = 
+            bind(VanillaSymbol, '\\forall ', '&forall;');        
+
 LatexCmds.and = LatexCmds.land = LatexCmds.wedge =
   bind(BinaryOperator,'\\wedge ','&and;');
 
