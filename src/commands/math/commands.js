@@ -504,6 +504,53 @@ LatexCmds['√'] = P(MathCommand, function(_, super_) {
   };
 });
 
+/**
+ * Lab51 custom functions
+ */
+
+var Log =
+    LatexCmds.log = P(MathCommand, function (_, super_) {
+        _.ctrlSeq = '\\log';
+        _.textTemplate = ['log(', ')(', ')'];
+        _.htmlTemplate =
+            '<span class="mq-non-leaf">log'
+            + '<span class="mq-supsub mq-non-leaf"><span class="mq-sub mq-log-base mq-non-leaf">&0</span></span>'
+            + '<span class="mq-non-leaf mq-inner-func mq-stem">&1</span>'
+            + '</span>'
+        ;
+        _.latex = function () {
+            return '\\log{' + this.ends[L].latex() + '}{' + this.ends[R].latex() + '}';
+        };
+    });
+
+function getSingleParameterFunctionFromTemplate(func, funcText) {
+    return P(MathCommand, function (_, super_) {
+        _.textTemplate = [func + '(', ')'];
+        _.htmlTemplate =
+            '<span class="mq-func mq-non-leaf">' + funcText
+            + '<span class="mq-non-leaf mq-inner-func mq-stem">&0</span>'
+            + '</span>'
+        ;
+        _.latex = function () {
+            return '\\' + func + '{' + this.ends[L].latex() + '}';
+        };
+    });
+}
+
+var Ln = LatexCmds.ln = getSingleParameterFunctionFromTemplate('ln', 'ln');
+var Log10 = LatexCmds.lg = getSingleParameterFunctionFromTemplate('lg', 'Log');
+var Sin = LatexCmds.sin = getSingleParameterFunctionFromTemplate('sin', 'sen');
+var Cos = LatexCmds.cos = getSingleParameterFunctionFromTemplate('cos', 'cos');
+var Tan = LatexCmds.tan = getSingleParameterFunctionFromTemplate('tan', 'tg');
+var Cot = LatexCmds.cot = getSingleParameterFunctionFromTemplate('cot', 'cotg');
+var Arcsin = LatexCmds.arcsin = getSingleParameterFunctionFromTemplate('arcsin', 'arcsen');
+var Arccos = LatexCmds.arccos = getSingleParameterFunctionFromTemplate('arccos', 'arccos');
+var Arctan = LatexCmds.arctan = getSingleParameterFunctionFromTemplate('arctan', 'arctg');
+
+/**
+ * End of Lab51 custom functions
+ */
+
 var Hat = LatexCmds.hat = P(MathCommand, function(_, super_) {
   _.ctrlSeq = '\\hat';
   _.htmlTemplate =
