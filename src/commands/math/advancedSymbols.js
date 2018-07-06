@@ -300,8 +300,11 @@ LatexCmds.xist = //LOL
 LatexCmds.xists = LatexCmds.exist = LatexCmds.exists =
   bind(VanillaSymbol,'\\exists ','&exist;');
   
-LatexCmds.nexists = LatexCmds.nexist =
-      bind(VanillaSymbol, '\\nexists ', '&#8708;');
+LatexCmds.nexists = LatexCmds.nexist =LatexCmds.Nonesiste =
+  LatexCmds.nonesiste =  LatexCmds.Mai = LatexCmds.mai = 
+  bind(VanillaSymbol, '\\nexist ', '&#8708;');
+
+LatexCmds.forall = bind(VanillaSymbol, '\\forall ', '&forall;'); 
 
 LatexCmds.and = LatexCmds.land = LatexCmds.wedge =
   bind(BinaryOperator,'\\wedge ','&and;');
