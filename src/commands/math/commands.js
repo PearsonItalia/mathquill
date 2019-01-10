@@ -509,43 +509,131 @@ LatexCmds['√'] = P(MathCommand, function(_, super_) {
  */
 
 var Log =
-    LatexCmds.log = P(MathCommand, function (_, super_) {
+    LatexCmds.log = P(P(MathCommand, DelimsMixinForcedParenthesesLogarithm), function (_, super_) {
         _.ctrlSeq = '\\log';
         _.textTemplate = ['log(', ')(', ')'];
         _.htmlTemplate =
-            '<span class="mq-non-leaf">log'
-            + '<span class="mq-supsub mq-non-leaf"><span class="mq-sub mq-log-base mq-non-leaf">&0</span></span>'
-            + '<span class="mq-non-leaf mq-inner-func mq-stem">&1</span>'
+            '<var class="mq-operator-name">l</var>'
+            + '<var class="mq-operator-name">o</var>'
+            + '<var class="mq-operator-name">g</var>'
+            + '<span class="mq-supsub mq-non-leaf"><span class="mq-sup mq-lab51-exponent">&0</span><span class="mq-sub mq-lab51-log-base">&1</span><span style="display:inline-block;width:0">&#8203;</span></span>'
+            + '<span class="mq-non-leaf">'
+            + '<span class="mq-scaled mq-paren">(</span>'
+            + '<span class="mq-non-leaf mq-lab51-inner-func">&2</span>'
+            + '<span class="mq-scaled mq-paren">)</span>'
             + '</span>'
         ;
         _.latex = function () {
-            return '\\log{' + this.ends[L].latex() + '}{' + this.ends[R].latex() + '}';
+            return '\\log{' + this.blocks[0].latex() + '}{' + this.blocks[1].latex() + '}{' + this.blocks[2].latex() + '}';
+        };
+        _.placeCursor = function (cursor) {
+            // Place the cursor on argument
+            cursor.insAtRightEnd(this.foldChildren(this.ends[L], function (leftward, child) {
+                return child;
+            }));
         };
     });
 
-function getSingleParameterFunctionFromTemplate(func, funcText) {
-    return P(MathCommand, function (_, super_) {
-        _.textTemplate = [func + '(', ')'];
+var LogWithBase =
+    LatexCmds.logwithbase = P(P(MathCommand, DelimsMixinForcedParenthesesLogarithm), function (_, super_) {
+        _.ctrlSeq = '\\log';
+        _.textTemplate = ['log(', ')(', ')'];
         _.htmlTemplate =
-            '<span class="mq-func mq-non-leaf">' + funcText
-            + '<span class="mq-non-leaf mq-inner-func mq-stem">&0</span>'
+            '<var class="mq-operator-name">l</var>'
+            + '<var class="mq-operator-name">o</var>'
+            + '<var class="mq-operator-name">g</var>'
+            + '<span class="mq-supsub mq-non-leaf"><span class="mq-sup mq-lab51-exponent">&0</span><span class="mq-sub mq-lab51-log-base">&1</span><span style="display:inline-block;width:0">&#8203;</span></span>'
+            + '<span class="mq-non-leaf">'
+            + '<span class="mq-scaled mq-paren">(</span>'
+            + '<span class="mq-non-leaf mq-lab51-inner-func">&2</span>'
+            + '<span class="mq-scaled mq-paren">)</span>'
             + '</span>'
         ;
         _.latex = function () {
-            return '\\' + func + '{' + this.ends[L].latex() + '}';
+            return '\\log{' + this.blocks[0].latex() + '}{' + this.blocks[1].latex() + '}{' + this.blocks[2].latex() + '}';
+        };
+        _.placeCursor = function (cursor) {
+            // Place the cursor on base
+            cursor.insAtRightEnd(this.foldChildren(this.blocks[1], function (leftward, child) {
+                return leftward;
+            }));
+        };
+    });
+
+function DelimsMixinForcedParenthesesLogarithm(_, super_) {
+    _.jQadd = function () {
+        super_.jQadd.apply(this, arguments);
+        this.delimjQs = this.jQ.children('.mq-paren:first').add(this.jQ.children(':last'));
+        this.contentjQ = this.jQ.children(':eq(4)');
+    };
+    _.reflow = function () {
+        var height = this.contentjQ.outerHeight()
+            / parseFloat(this.contentjQ.css('fontSize'));
+        scale(this.delimjQs, min(1 + .2 * (height - 1), 1.2), 1.2 * height);
+    };
+}
+
+function DelimsMixinForcedParenthesesFunctional(_, super_) {
+    _.jQadd = function () {
+        super_.jQadd.apply(this, arguments);
+        this.delimjQs = this.jQ.children('.mq-paren:first').add(this.jQ.children(':last'));
+        this.contentjQ = this.jQ.children(':eq(2)');
+    };
+    _.reflow = function () {
+        var height = this.contentjQ.outerHeight()
+            / parseFloat(this.contentjQ.css('fontSize'));
+        scale(this.delimjQs, min(1 + .2 * (height - 1), 1.2), 1.2 * height);
+    };
+}
+
+function getSingleParameterFunctionFromTemplate(func, funcText) {
+    return P(P(MathCommand, DelimsMixinForcedParenthesesFunctional), function (_, super_) {
+        _.ctrlSeq = '\\' + func;
+        _.textTemplate = [func + '(', ')'];
+        _.htmlTemplate =
+            getOperatorHtml(funcText)
+            + '<span class="mq-supsub mq-sup-only mq-non-leaf"><span class="mq-sup mq-lab51-exponent">&0</span></span>'
+            + '<span class="mq-non-leaf">'
+            + '<span class="mq-scaled mq-paren">(</span>'
+            + '<span class="mq-non-leaf mq-lab51-inner-func">&1</span>'
+            + '<span class="mq-scaled mq-paren">)</span>'
+            + '</span>'
+        ;
+        _.latex = function () {
+            return '\\' + func + '{' + this.ends[L].latex() + '}' + '{' + this.ends[R].latex() + '}';
+        };
+        _.placeCursor = function (cursor) {
+            // Place the cursor on the argument
+            cursor.insAtRightEnd(this.foldChildren(this.ends[L], function (leftward, child) {
+                return child;
+            }));
         };
     });
 }
 
+function getOperatorHtml(operator) {
+    var letters = operator.split("");
+    var operatorHtml = "";
+
+    for(var i = 0; i < letters.length; i++) {
+        operatorHtml += '<var class="mq-operator-name">' + letters[i] + '</var>';
+    }
+
+    return operatorHtml;
+}
+
 var Ln = LatexCmds.ln = getSingleParameterFunctionFromTemplate('ln', 'ln');
-var Log10 = LatexCmds.lg = getSingleParameterFunctionFromTemplate('lg', 'Log');
-var Sin = LatexCmds.sin = getSingleParameterFunctionFromTemplate('sin', 'sen');
+var Log10 = LatexCmds.lgdieci = getSingleParameterFunctionFromTemplate('lgdieci', 'log');
+var Sin = LatexCmds.sin = getSingleParameterFunctionFromTemplate('sin', 'sin');
 var Cos = LatexCmds.cos = getSingleParameterFunctionFromTemplate('cos', 'cos');
-var Tan = LatexCmds.tan = getSingleParameterFunctionFromTemplate('tan', 'tg');
-var Cot = LatexCmds.cot = getSingleParameterFunctionFromTemplate('cot', 'cotg');
-var Arcsin = LatexCmds.arcsin = getSingleParameterFunctionFromTemplate('arcsin', 'arcsen');
+var Sec = LatexCmds.sec = getSingleParameterFunctionFromTemplate('sec', 'sec');
+var Csc = LatexCmds.csc = getSingleParameterFunctionFromTemplate('csc', 'csc');
+var Tan = LatexCmds.tan = getSingleParameterFunctionFromTemplate('tan', 'tan');
+var Cot = LatexCmds.cot = getSingleParameterFunctionFromTemplate('cot', 'cot');
+var Arcsin = LatexCmds.arcsin = getSingleParameterFunctionFromTemplate('arcsin', 'arcsin');
 var Arccos = LatexCmds.arccos = getSingleParameterFunctionFromTemplate('arccos', 'arccos');
-var Arctan = LatexCmds.arctan = getSingleParameterFunctionFromTemplate('arctan', 'arctg');
+var Arctan = LatexCmds.arctan = getSingleParameterFunctionFromTemplate('arctan', 'arctan');
+var Arccot = LatexCmds.arccot = getSingleParameterFunctionFromTemplate('arccot', 'arccot');
 
 /**
  * End of Lab51 custom functions
